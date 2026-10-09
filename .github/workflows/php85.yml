@@ -1,0 +1,45 @@
+name: PHP 8.5 image builds
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ['8.5', '8.5-alpine']
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build base PHP image
+        shell: bash
+        run: |
+          set -o pipefail
+          directory=php-official
+          if [ "${{ matrix.variant }}" = '8.5-alpine' ]; then directory=php; fi
+          docker build --progress=plain -t webdevops/php:${{ matrix.variant }} "docker/$directory/${{ matrix.variant }}" 2>&1 | tee /tmp/php85-build.log
+      - name: Verify PHP version and actual runtime
+        run: docker run --rm --entrypoint php webdevops/php:${{ matrix.variant }} -r 'if (PHP_VERSION_ID < 80500 || PHP_VERSION_ID >= 80600) { exit(1); } echo PHP_VERSION, PHP_EOL;'
+      - name: Run the existing base and PHP structure tests
+        run: |
+          docker create --name php85-test-tools webdevops/dockerfile-build-env@sha256:455069f31d7b8c377ec04b58cd5ff410cd726504b4d6880cc6032b76d4e0d881
+          docker cp php85-test-tools:/usr/local/bin/container-structure-test /tmp/container-structure-test
+          docker rm php85-test-tools
+          chmod +x /tmp/container-structure-test
+          /tmp/container-structure-test test --image webdevops/php:${{ matrix.variant }} --config tests/structure-test/bootstrap/test.yaml --config tests/structure-test/base/test.yaml --config tests/structure-test/base-app/test.yaml --config tests/structure-test/php/test.yaml
+      - name: Build and test all retained derived image types for PHP 8.5
+        shell: bash
+        run: |
+          for image in php-dev php-apache php-nginx php-apache-dev php-nginx-dev; do
+            docker build --progress=plain -t "webdevops/$image:${{ matrix.variant }}" "docker/$image/${{ matrix.variant }}"
+            tests=(--config tests/structure-test/bootstrap/test.yaml --config tests/structure-test/base/test.yaml --config tests/structure-test/base-app/test.yaml --config tests/structure-test/php/test.yaml)
+            if [[ "$image" == *-dev ]]; then tests+=(--config tests/structure-test/php-dev/test.yaml); fi
+            if [[ "$image" == php-nginx* ]]; then tests+=(--config tests/structure-test/php-nginx/test.yaml); fi
+            /tmp/container-structure-test test --image "webdevops/$image:${{ matrix.variant }}" "${tests[@]}"
+          done
+      - name: Report build failure
+        if: failure()
+        run: |
+          if [ -f /tmp/php85-build.log ]; then
+            python3 -c 'import pathlib; s=pathlib.Path("/tmp/php85-build.log").read_text(); lines=s.splitlines(); selected={j for i,l in enumerate(lines) if "ERROR:" in l and len(l)<500 for j in range(max(0,i-2),min(len(lines),i+15))}; s="\n".join(lines[j] for j in sorted(selected) if len(lines[j]) < 800)[:5000]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+          fi
