@@ -27,10 +27,15 @@ jobs:
           docker rm php85-test-tools
           chmod +x /tmp/container-structure-test
           /tmp/container-structure-test test --image webdevops/php:${{ matrix.variant }} --config tests/structure-test/bootstrap/test.yaml --config tests/structure-test/base/test.yaml --config tests/structure-test/base-app/test.yaml --config tests/structure-test/php/test.yaml
-      - name: Build all retained derived image types for PHP 8.5
+      - name: Build and test all retained derived image types for PHP 8.5
+        shell: bash
         run: |
           for image in php-dev php-apache php-nginx php-apache-dev php-nginx-dev; do
             docker build --progress=plain -t "webdevops/$image:${{ matrix.variant }}" "docker/$image/${{ matrix.variant }}"
+            tests=(--config tests/structure-test/bootstrap/test.yaml --config tests/structure-test/base/test.yaml --config tests/structure-test/base-app/test.yaml --config tests/structure-test/php/test.yaml)
+            if [[ "$image" == *-dev ]]; then tests+=(--config tests/structure-test/php-dev/test.yaml); fi
+            if [[ "$image" == php-nginx* ]]; then tests+=(--config tests/structure-test/php-nginx/test.yaml); fi
+            /tmp/container-structure-test test --image "webdevops/$image:${{ matrix.variant }}" "${tests[@]}"
           done
       - name: Report build failure
         if: failure()
