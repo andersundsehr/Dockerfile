@@ -1,0 +1,25 @@
+name: PHP 8.5 image builds
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ['8.5', '8.5-alpine']
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build base PHP image
+        run: |
+          directory=php-official
+          if [ "${{ matrix.variant }}" = '8.5-alpine' ]; then directory=php; fi
+          docker build --progress=plain -t webdevops/php:${{ matrix.variant }} "docker/$directory/${{ matrix.variant }}"
+      - name: Verify PHP version and actual runtime
+        run: docker run --rm --entrypoint php webdevops/php:${{ matrix.variant }} -r 'if (PHP_VERSION_ID < 80500 || PHP_VERSION_ID >= 80600) { exit(1); } echo PHP_VERSION, PHP_EOL;'
+      - name: Build all retained derived image types for PHP 8.5
+        run: |
+          for image in php-dev php-apache php-nginx php-apache-dev php-nginx-dev; do
+            docker build --progress=plain -t "webdevops/$image:${{ matrix.variant }}" "docker/$image/${{ matrix.variant }}"
+          done
