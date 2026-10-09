@@ -254,7 +254,11 @@
         icu-dev \
         postgresql-dev \
         libxml2-dev \
+{% if version == '8.5' %}
+        samba-dev \
+{% else %}
         ldb-dev \
+{% endif %}
         pcre-dev \
         libxslt-dev \
         libzip-dev \
@@ -339,7 +343,11 @@
     {%- if version == '7.3' or version == '7.4' or version == '8.0' or version == '8.1' or version == '8.2' or version == '8.3'  or version == '8.4' %}
     # Memcached for 7.3 can currently only be built from master
     && MEMCACHED="`mktemp -d`" \
+{% if version == '8.5' %}
+    && curl -fsSL https://github.com/php-memcached-dev/php-memcached/archive/master.tar.gz | tar zxf - --strip-components 1 -C $MEMCACHED \
+{% else %}
     && curl -skL https://github.com/php-memcached-dev/php-memcached/archive/master.tar.gz | tar zxf - --strip-components 1 -C $MEMCACHED \
+{% endif %}
     && docker-php-ext-configure $MEMCACHED \
     && docker-php-ext-install $MEMCACHED \
     && rm -rf $MEMCACHED \
@@ -412,7 +420,11 @@
         icu-dev \
         postgresql-dev \
         libxml2-dev \
+{% if version == '8.5' %}
+        samba-dev \
+{% else %}
         ldb-dev \
+{% endif %}
         pcre-dev \
         libxslt-dev \
         libzip-dev \

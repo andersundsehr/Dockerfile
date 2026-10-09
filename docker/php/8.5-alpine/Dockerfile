@@ -123,7 +123,7 @@ RUN set -x \
         icu-dev \
         postgresql-dev \
         libxml2-dev \
-        ldb-dev \
+        samba-dev \
         pcre-dev \
         libxslt-dev \
         libzip-dev \
@@ -224,7 +224,7 @@ RUN set -x \
         icu-dev \
         postgresql-dev \
         libxml2-dev \
-        ldb-dev \
+        samba-dev \
         pcre-dev \
         libxslt-dev \
         libzip-dev \
