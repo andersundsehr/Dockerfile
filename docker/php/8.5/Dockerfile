@@ -1,5 +1,5 @@
 #+++++++++++++++++++++++++++++++++++++++
-# Dockerfile for webdevops/php-official:8.5
+# Dockerfile for webdevops/php:8.5
 #    -- automatically generated  --
 #+++++++++++++++++++++++++++++++++++++++
 
@@ -172,6 +172,7 @@ RUN set -x \
         zip \
         gd \
         gettext \
+
     && pecl install memcached \
     && pecl install apcu \
     && pecl install excimer \

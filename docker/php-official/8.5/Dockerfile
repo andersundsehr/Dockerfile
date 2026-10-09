@@ -172,6 +172,7 @@ RUN set -x \
         zip \
         gd \
         gettext \
+
     && pecl install memcached \
     && pecl install apcu \
     && pecl install excimer \
