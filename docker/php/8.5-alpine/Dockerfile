@@ -92,7 +92,6 @@ RUN set -x \
         pngquant \
         vips \
         rabbitmq-c \
-        c-client \
         # Libraries
         libldap \
         icu-libs \
@@ -118,7 +117,6 @@ RUN set -x \
         vips-dev \
         krb5-dev \
         openssl-dev \
-        imap-dev \
         imagemagick-dev \
         rabbitmq-c-dev \
         openldap-dev \
@@ -138,7 +136,7 @@ RUN set -x \
     && cp guetzli-master/bin/Release/guetzli /usr/local/bin/ \
     && rm -rf master.zip guetzli-master \
     # https://github.com/docker-library/php/issues/240
-    && apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted \
+    && apk add --no-cache gnu-libiconv \
     # Install new version of ICU
     && curl -sS -o /tmp/icu.tar.gz -L https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz \
     && tar -zxf /tmp/icu.tar.gz -C /tmp && cd /tmp/icu/source && ./configure --prefix=/usr/local && make && make install && cd / && rm -rf /tmp/icu* \
@@ -177,11 +175,10 @@ RUN set -x \
         zip \
         gd \
         gettext \
-        opcache \
     # Install extensions for PHP 7.x
     # Memcached for 7.3 can currently only be built from master
     && MEMCACHED="`mktemp -d`" \
-    && curl -skL https://github.com/php-memcached-dev/php-memcached/archive/master.tar.gz | tar zxf - --strip-components 1 -C $MEMCACHED \
+    && curl -fsSL https://github.com/php-memcached-dev/php-memcached/archive/master.tar.gz | tar zxf - --strip-components 1 -C $MEMCACHED \
     && docker-php-ext-configure $MEMCACHED \
     && docker-php-ext-install $MEMCACHED \
     && rm -rf $MEMCACHED \
@@ -221,7 +218,6 @@ RUN set -x \
         vips-dev \
         krb5-dev \
         openssl-dev \
-        imap-dev \
         rabbitmq-c-dev \
         imagemagick-dev \
         openldap-dev \

@@ -126,7 +126,9 @@
         zip \
         gd \
         gettext \
+{% if version != '8.5' %}
         opcache \
+{% endif %}
 {%- if version|int == 5 %}
     # Install extensions for PHP 5.x
     && pecl install apcu-4.0.11 \
@@ -215,7 +217,9 @@
         pngquant \
         vips \
         rabbitmq-c \
+{% if version != '8.5' %}
         c-client \
+{% endif %}
         # Libraries
         libldap \
         icu-libs \
@@ -241,7 +245,9 @@
         vips-dev \
         krb5-dev \
         openssl-dev \
+{% if version != '8.5' %}
         imap-dev \
+{% endif %}
         imagemagick-dev \
         rabbitmq-c-dev \
         openldap-dev \
@@ -261,7 +267,11 @@
     && cp guetzli-master/bin/Release/guetzli /usr/local/bin/ \
     && rm -rf master.zip guetzli-master \
     # https://github.com/docker-library/php/issues/240
+{% if version == '8.5' %}
+    && apk add --no-cache gnu-libiconv \
+{% else %}
     && apk add gnu-libiconv --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted \
+{% endif %}
     # Install new version of ICU
     && curl -sS -o /tmp/icu.tar.gz -L https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz \
     && tar -zxf /tmp/icu.tar.gz -C /tmp && cd /tmp/icu/source && ./configure --prefix=/usr/local && make && make install && cd / && rm -rf /tmp/icu* \
@@ -322,7 +332,9 @@
         zip \
         gd \
         gettext \
+{% if version != '8.5' %}
         opcache \
+{% endif %}
     # Install extensions for PHP 7.x
     {%- if version == '7.3' or version == '7.4' or version == '8.0' or version == '8.1' or version == '8.2' or version == '8.3'  or version == '8.4' %}
     # Memcached for 7.3 can currently only be built from master
@@ -391,7 +403,9 @@
         vips-dev \
         krb5-dev \
         openssl-dev \
+{% if version != '8.5' %}
         imap-dev \
+{% endif %}
         rabbitmq-c-dev \
         imagemagick-dev \
         openldap-dev \

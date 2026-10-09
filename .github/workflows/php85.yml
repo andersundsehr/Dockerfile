@@ -29,5 +29,5 @@ jobs:
         if: failure()
         run: |
           if [ -f /tmp/php85-build.log ]; then
-            python3 -c 'import pathlib; s=pathlib.Path("/tmp/php85-build.log").read_text()[-5000:]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+            python3 -c 'import pathlib; s=pathlib.Path("/tmp/php85-build.log").read_text(); s="\n".join(l for l in s.splitlines() if any(w in l.lower() for w in ["error", "no such", "not found", "failed", "unable"]))[:5000]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
           fi
