@@ -12,10 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Build base PHP image
+        shell: bash
         run: |
+          set -o pipefail
           directory=php-official
           if [ "${{ matrix.variant }}" = '8.5-alpine' ]; then directory=php; fi
-          docker build --progress=plain -t webdevops/php:${{ matrix.variant }} "docker/$directory/${{ matrix.variant }}"
+          docker build --progress=plain -t webdevops/php:${{ matrix.variant }} "docker/$directory/${{ matrix.variant }}" 2>&1 | tee /tmp/php85-build.log
       - name: Verify PHP version and actual runtime
         run: docker run --rm --entrypoint php webdevops/php:${{ matrix.variant }} -r 'if (PHP_VERSION_ID < 80500 || PHP_VERSION_ID >= 80600) { exit(1); } echo PHP_VERSION, PHP_EOL;'
       - name: Build all retained derived image types for PHP 8.5
@@ -23,3 +25,8 @@ jobs:
           for image in php-dev php-apache php-nginx php-apache-dev php-nginx-dev; do
             docker build --progress=plain -t "webdevops/$image:${{ matrix.variant }}" "docker/$image/${{ matrix.variant }}"
           done
+      - name: Report build failure
+        if: failure()
+        run: |
+          if [ -f /tmp/php85-build.log ]; then
+            python3 -c 'import pathlib; s=pathlib.Path("/tmp/php85-build.log").read_text()[-5000:]; print("::error::"+s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
