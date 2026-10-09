@@ -20,6 +20,13 @@ jobs:
           docker build --progress=plain -t webdevops/php:${{ matrix.variant }} "docker/$directory/${{ matrix.variant }}" 2>&1 | tee /tmp/php85-build.log
       - name: Verify PHP version and actual runtime
         run: docker run --rm --entrypoint php webdevops/php:${{ matrix.variant }} -r 'if (PHP_VERSION_ID < 80500 || PHP_VERSION_ID >= 80600) { exit(1); } echo PHP_VERSION, PHP_EOL;'
+      - name: Run the existing base and PHP structure tests
+        run: |
+          docker create --name php85-test-tools webdevops/dockerfile-build-env@sha256:455069f31d7b8c377ec04b58cd5ff410cd726504b4d6880cc6032b76d4e0d881
+          docker cp php85-test-tools:/usr/local/bin/container-structure-test /tmp/container-structure-test
+          docker rm php85-test-tools
+          chmod +x /tmp/container-structure-test
+          /tmp/container-structure-test test --image webdevops/php:${{ matrix.variant }} --config tests/structure-test/bootstrap/test.yaml --config tests/structure-test/base/test.yaml --config tests/structure-test/base-app/test.yaml --config tests/structure-test/php/test.yaml
       - name: Build all retained derived image types for PHP 8.5
         run: |
           for image in php-dev php-apache php-nginx php-apache-dev php-nginx-dev; do
