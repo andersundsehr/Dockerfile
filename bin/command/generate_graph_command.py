@@ -1,4 +1,4 @@
-#!/usr/bin/env/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # (c) 2016 WebDevOps.io
@@ -43,7 +43,7 @@ class GenerateGraphCommand(BaseCommand):
         '--format': Enum(['png', 'jpg', 'pdf', 'svg'])
     }
 
-    from_regex = re.compile(ur'FROM\s+(?P<image>[^\s:]+)(:(?P<tag>.+))?', re.MULTILINE)
+    from_regex = re.compile(r'FROM\s+(?P<image>[^\s:]+)(:(?P<tag>.+))?', re.MULTILINE)
 
     containers = {}
 
@@ -116,7 +116,7 @@ class GenerateGraphCommand(BaseCommand):
 
         :return: self
         """
-        if not self.tags.has_key(docker_image):
+        if docker_image not in self.tags:
             self.tags[docker_image] = {}
         self.tags[docker_image][tag] = tag
         return self
@@ -181,10 +181,10 @@ class GenerateGraphCommand(BaseCommand):
                     )
         dia = self.__apply_styles(dia, self.conf['diagram']['styles'])
 
-        label = r'label = "\n\n%s"' % self.configuration.get('graph.label')
+        label = '\t' + r'label = "\n\n%s"' % self.configuration.get('graph.label') + '\n'
 
         dia.body.append(label % date.today().strftime("%Y-%m-%d"))
-        dia.body.append('newrank=true;')
+        dia.body.append('\tnewrank=true;\n')
 
         rank_image_list = {}
         rank_group_list = {}
@@ -192,7 +192,7 @@ class GenerateGraphCommand(BaseCommand):
         # Create subgraph
         for group, group_attr in self.conf['diagram']['groups'].items():
             self.subgraph[group] = Digraph('cluster_%s' % group)
-            self.subgraph[group].body.append(r'label = "%s"' % group_attr['name'])
+            self.subgraph[group].body.append('\t' + r'label = "%s"' % group_attr['name'] + '\n')
             self.subgraph[group] = self.__apply_styles(self.subgraph[group], group_attr['styles'])
 
             if 'rank' in group_attr:
@@ -237,7 +237,7 @@ class GenerateGraphCommand(BaseCommand):
 
                 for image in imagelist:
                     for image_next in imagelist_next:
-                        dia.body.append('{ "%s" -> "%s" [style=invis] }' % (image, image_next))
+                        dia.body.append('\t{ "%s" -> "%s" [style=invis] }\n' % (image, image_next))
 
         return dia
 

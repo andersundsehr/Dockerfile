@@ -1,4 +1,4 @@
-#!/usr/bin/env/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # (c) 2016 WebDevOps.io
@@ -20,9 +20,8 @@
 
 import os
 import yaml
-import yamlordereddictloader
 import time
-import Queue
+import queue
 import shutil
 import grp
 from cleo import Output
@@ -46,7 +45,7 @@ class GenerateProvisionCommand(BaseCommand):
     __queue = ''
 
     def run_task(self, configuration):
-        self.__queue = Queue.Queue()
+        self.__queue = queue.Queue()
         if Output.VERBOSITY_VERBOSE <= self.output.get_verbosity():
             self.line('<info>provision :</info> %s' % configuration.get('provisionPath'))
             self.line('<info>dockerfile :</info> %s' % configuration.get('dockerPath'))
@@ -76,8 +75,8 @@ class GenerateProvisionCommand(BaseCommand):
                 self.__queue,
                 self.output
             )
-            provisioner.setDaemon(True)
-            provisioner.setName(thread_name)
+            provisioner.daemon = True
+            provisioner.name = thread_name
             provisioner.start()
             # self.__threads.append(provisioner)
 
@@ -86,8 +85,8 @@ class GenerateProvisionCommand(BaseCommand):
         Load the configuration for provisioning image
         """
         configuration_file = os.path.join(self.configuration.get('confPath'), 'provision.yml')
-        stream = open(configuration_file, "r")
-        self.conf = yaml.load(stream, Loader=yamlordereddictloader.Loader)
+        with open(configuration_file, "r") as stream:
+            self.conf = yaml.safe_load(stream)
 
     def __build_base_layout(self):
         """

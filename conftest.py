@@ -7,15 +7,13 @@ test_conf_path = os.path.join(test_path, 'conf')
 test_conf_app_path = os.path.join(test_conf_path, 'app')
 
 # Use testinfra to get a handy function to run commands locally
-check_output = testinfra.get_backend(
-    "local://"
-).get_module("Command").check_output
+check_output = testinfra.get_host("local://").check_output
 
 
 @pytest.fixture
-def TestinfraBackend(request):
-    # Override the TestinfraBackend fixture,
-    # all testinfra fixtures (i.e. modules) depend on it.
+def host(request):
+    # Override the testinfra host fixture,
+    # all testinfra modules (host.file, host.run, ...) are provided by it.
 
     docker_command = ''
     docker_image = request.param
@@ -45,5 +43,5 @@ def TestinfraBackend(request):
     if docker_sleeptime:
         time.sleep(docker_sleeptime)
 
-    # Return a dynamic created backend
-    return testinfra.get_backend("docker://" + docker_id)
+    # Return a dynamic created host
+    return testinfra.get_host("docker://" + docker_id)

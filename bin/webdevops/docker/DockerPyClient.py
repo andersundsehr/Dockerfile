@@ -1,4 +1,4 @@
-#!/usr/bin/env/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # (c) 2016 WebDevOps.io
@@ -110,5 +110,5 @@ class DockerPyClient(DockerBaseClient):
                 if 'id' in line:
                     message += ' ' + line['id']
                 output_message(message)
-        print ''
+        print('')
         return ret
