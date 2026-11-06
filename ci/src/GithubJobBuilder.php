@@ -383,7 +383,9 @@ class GithubJobBuilder
                 [
                     'name' => 'Validate that template/* are used to generate Dockerfiles',
                     'run' => implode("\n", [
-                        'docker run --rm -v $PWD:/app -w /app webdevops/dockerfile-build-env make provision',
+                        'python3 -m venv "$RUNNER_TEMP/venv"',
+                        '"$RUNNER_TEMP/venv/bin/python" -m pip install -r bin/requirements.txt',
+                        'make provision PYTHON="$RUNNER_TEMP/venv/bin/python"',
                         'git diff --exit-code --color=always',
                     ]),
                 ],

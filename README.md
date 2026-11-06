@@ -37,6 +37,14 @@ docker run --rm -ti -v $PWD:/app -w /app webdevops/dockerfile-build-env make pro
 It will use the Jinja2 templates inside of the `template` directory and the 
 config files from the `provisioning` directory.
 
+Without Docker, the same can be done with a local Python 3 (3.10 or newer):
+
+```
+python3 -m venv /tmp/dockerfile-venv
+/tmp/dockerfile-venv/bin/python -m pip install -r bin/requirements.txt
+make provision PYTHON=/tmp/dockerfile-venv/bin/python
+```
+
 **The files in the `docker` directory are never modified manually**
 
 *This will be replaced with PHP twig templates in the future to streamline everything.*

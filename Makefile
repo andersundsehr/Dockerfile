@@ -2,6 +2,8 @@ ARGS = $(filter-out $@,$(MAKECMDGOALS))
 MAKEFLAGS += --silent
 .PHONY: test documentation provision
 
+PYTHON ?= python3
+
 DOCKER_REPOSITORY=`cat DOCKER_REPOSITORY`
 DOCKER_TAG_LATEST=`cat DOCKER_TAG_LATEST`
 
@@ -17,7 +19,7 @@ full:      provision build
 all:       build
 
 build:
-	python2 ./bin/console docker:build --threads=auto
+	$(PYTHON) ./bin/console docker:build --threads=auto
 
 bootstrap: webdevops/bootstrap webdevops/ansible
 base:      webdevops/base webdevops/base-app webdevops/storage
@@ -36,27 +38,27 @@ misc:      webdevops/mail-sandbox webdevops/sphinx webdevops/liquibase
 setup:     requirements
 
 requirements:
-	pip install --upgrade -I -r ./bin/requirements.txt
+	$(PYTHON) -m pip install --upgrade -I -r ./bin/requirements.txt
 	cd tests/serverspec && bundle install --path=vendor
 
 test:
-	python2 bin/console test:serverspec --threads=auto -v
+	$(PYTHON) bin/console test:serverspec --threads=auto -v
 
 structure-test:
 	cd tests/structure-test && ./run.sh
 
 provision:
-	python2 bin/console generate:dockerfile
-	python2 bin/console generate:provision
+	$(PYTHON) bin/console generate:dockerfile
+	$(PYTHON) bin/console generate:provision
 
 push:
-	python2 ./bin/console docker:push --threads=auto
+	$(PYTHON) ./bin/console docker:push --threads=auto
 
 graph:
-	python2 ./bin/console generate:graph
+	$(PYTHON) ./bin/console generate:graph
 
 graph-full:
-	python2 ./bin/console generate:graph --all\
+	$(PYTHON) ./bin/console generate:graph --all\
 		--filename docker-image-full-layout.gv
 
 documentation:

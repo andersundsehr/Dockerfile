@@ -1,4 +1,4 @@
-#!/usr/bin/env/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # (c) 2016 WebDevOps.io
@@ -76,21 +76,30 @@ class TestinfraDockerPlugin:
                 tmp.append(item)
         return tmp
 
+    def pytest_configure(self, config):
+        """
+        Register custom markers
+        """
+        config.addinivalue_line("markers", "docker_images(*regexps): run test against all matching docker images")
+        config.addinivalue_line("markers", "docker_images_blacklist(*terms): exclude docker images containing term")
+        config.addinivalue_line("markers", "docker_loop: keep container running with an infinite loop command")
+        config.addinivalue_line("markers", "destructive: use a fresh container for each test")
+
     def pytest_generate_tests(self, metafunc):
         """
         Generate tests
         """
-        if "TestinfraBackend" in metafunc.fixturenames:
+        if "host" in metafunc.fixturenames:
             images = []
 
             # Lookup "docker_images" marker
-            marker = getattr(metafunc.function, "docker_images", None)
+            marker = metafunc.definition.get_closest_marker("docker_images")
             if marker is not None:
                 for marker_image_name in marker.args:
                     images.extend(self.get_image_list_by_regexp(marker_image_name))
 
             # Lookup "docker_images.blacklist" marker
-            marker = getattr(metafunc.function, "docker_images_blacklist", None)
+            marker = metafunc.definition.get_closest_marker("docker_images_blacklist")
             if marker is not None:
                 for blacklist_term in marker.args:
                     images = self.filter_list_by_term(
@@ -99,18 +108,18 @@ class TestinfraDockerPlugin:
                     )
 
             # Check for infinite loop
-            marker = getattr(metafunc.function, "docker_loop", None)
+            marker = metafunc.definition.get_closest_marker("docker_loop")
             if marker is not None:
                 images = ['{}#loop'.format(item) for item in images]
 
-            # If the test has a destructive marker, we scope TestinfraBackend
+            # If the test has a destructive marker, we scope host
             # at function level (i.e. executing for each test). If not we scope
             # at session level (i.e. all tests will share the same container)
-            if getattr(metafunc.function, "destructive", None) is not None:
+            if metafunc.definition.get_closest_marker("destructive") is not None:
                 scope = "function"
             else:
                 scope = "session"
 
             metafunc.parametrize(
-                "TestinfraBackend", images, indirect=True, scope=scope
+                "host", images, indirect=True, scope=scope
             )

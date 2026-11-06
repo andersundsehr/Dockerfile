@@ -1,4 +1,4 @@
-#!/usr/bin/env/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # (c) 2016 WebDevOps.io
@@ -25,7 +25,7 @@ def execute(cmd, cwd=False, env=None):
     Execute cmd and output stdout/stderr
     """
 
-    print 'Execute: %s' % ' '.join(cmd)
+    print('Execute: %s' % ' '.join(cmd))
 
     if env is not None:
         env = copy.deepcopy(env)
@@ -65,9 +65,9 @@ def execute(cmd, cwd=False, env=None):
         time.sleep(1)
 
     # output stdout
-    with open(file_stdout.name, 'r') as f:
+    with open(file_stdout.name, 'r', errors='replace') as f:
         for line in f:
-            print line.rstrip('\n')
+            print(line.rstrip('\n'))
 
     # restore current work directory
     os.chdir(path_current)
@@ -75,5 +75,5 @@ def execute(cmd, cwd=False, env=None):
     if proc.returncode == 0:
         return True
     else:
-        print '>> failed command with return code %s' % proc.returncode
+        print('>> failed command with return code %s' % proc.returncode)
         return False

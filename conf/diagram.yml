@@ -20,6 +20,7 @@ diagram:
       fontname: Courier
       fontsize: "12"
       fontcolor: white
+  # groups are matched in this order, the first matching group wins
   groups:
     official:
       name: Official images (Docker hub)
@@ -72,6 +73,22 @@ diagram:
         - webdevops/base.*
         - webdevops/ansible
         - webdevops/storage
+    php-dev:
+      name: PHP development images
+      rank: 4
+      styles:
+        graph:
+          style: filled
+          fillcolor: "#c0e5a8"
+        nodes:
+          fontname: Helvetica
+          shape: box
+          fontcolor: black
+          color: black
+          style: filled
+          fillcolor: "#78c445"
+      docker:
+        - webdevops/php.*-dev
     php:
       name: PHP images
       rank: 3
@@ -90,22 +107,6 @@ diagram:
         - webdevops/php
         - webdevops/php-apache
         - webdevops/php-nginx
-    php-dev:
-      name: PHP development images
-      rank: 4
-      styles:
-        graph:
-          style: filled
-          fillcolor: "#c0e5a8"
-        nodes:
-          fontname: Helvetica
-          shape: box
-          fontcolor: black
-          color: black
-          style: filled
-          fillcolor: "#78c445"
-      docker:
-        - webdevops/php.*-dev
     service:
       name: Service images
       rank: 3

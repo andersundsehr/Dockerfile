@@ -1,4 +1,4 @@
-#!/usr/bin/env/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # (c) 2016 WebDevOps.io
@@ -18,13 +18,13 @@
 # OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import sys, re, time, StringIO, tempfile, json, base64, os
+import sys, re, time, io, tempfile, json, base64, os
 from webdevops import DockerfileUtility
-from doit.cmd_base import TaskLoader
+from doit.cmd_base import TaskLoader2
 from doit.task import dict_to_task
 
 
-class BaseTaskLoader(TaskLoader):
+class BaseTaskLoader(TaskLoader2):
     configuration = False
     reporter = False
     TASK_COUNT = 0
@@ -34,8 +34,16 @@ class BaseTaskLoader(TaskLoader):
         """
         Constrcutor
         """
+        TaskLoader2.__init__(self)
+
         # Build configuration as namespace object
         self.configuration = configuration
+
+    def load_doit_config(self):
+        """
+        DOIT configuration
+        """
+        return {'verbosity': self.configuration.get('verbosity')}
 
     def process_tasklist(self, tasklist):
         """
@@ -45,7 +53,7 @@ class BaseTaskLoader(TaskLoader):
         for task in tasklist:
             ret.append(dict_to_task(task))
 
-        print 'Starting execution of %s tasks...' % (len(ret))
+        print('Starting execution of %s tasks...' % (len(ret)))
 
         BaseTaskLoader.TASK_COUNT = len(ret)
 
@@ -75,10 +83,10 @@ class BaseTaskLoader(TaskLoader):
         """
         Translate internal task name to human readable name
         """
-        res = re.search('^.*\|(.*)', name)
+        res = re.search(r'^.*\|(.*)', name)
 
         if res:
-            return re.search('^.*\|(.*)', name).group(1)
+            return re.search(r'^.*\|(.*)', name).group(1)
         else:
             return name
 
@@ -117,7 +125,7 @@ class BaseTaskLoader(TaskLoader):
         Will return the stdout if task fails as exception
         """
         backup = sys.stdout
-        sys.stdout = StringIO.StringIO()
+        sys.stdout = io.StringIO()
         status = func(task=task, *args)
         output = sys.stdout.getvalue().strip()
         sys.stdout.close()
@@ -126,7 +134,7 @@ class BaseTaskLoader(TaskLoader):
         if not status:
             raise Exception(output)
         else:
-            print output
+            print(output)
 
         return status
 
@@ -134,7 +142,7 @@ class BaseTaskLoader(TaskLoader):
 
     @staticmethod
     def task_statusfile(task):
-        return '%s/%s' % (tempfile.gettempdir(), base64.b64encode(task.name))
+        return '%s/%s' % (tempfile.gettempdir(), base64.urlsafe_b64encode(task.name.encode('utf-8')).decode('ascii'))
 
     @staticmethod
     def task_write_statusfile(task, data):
@@ -164,5 +172,5 @@ class BaseTaskLoader(TaskLoader):
 
     @staticmethod
     def task_remove_statusfile(task):
-        filename = '%s/%s' % (tempfile.gettempdir(), base64.b64encode(task.name))
+        filename = BaseTaskLoader.task_statusfile(task)
         os.remove(filename)

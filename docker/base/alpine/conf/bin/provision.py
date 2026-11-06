@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import argparse
@@ -119,7 +119,7 @@ def actionRun(args):
         playbookContent = buildPlaybookFromArgs(args)
 
         if playbookContent:
-            f = tempfile.NamedTemporaryFile(dir=PROVISION_DIR, prefix='playbook.', suffix='.yml', delete=False)
+            f = tempfile.NamedTemporaryFile(mode='w', dir=PROVISION_DIR, prefix='playbook.', suffix='.yml', delete=False)
             f.write(playbookContent)
             f.close()
             playbook = f.name
@@ -158,7 +158,7 @@ def actionPlaybook(args):
     playbook = buildPlaybookFromArgs(args)
 
     if playbook:
-        print playbook
+        print(playbook)
     else:
         sys.exit(1)
 
@@ -171,7 +171,7 @@ def actionList(args):
     for tag in args.tags:
         if tag in json:
             for role in json[tag]:
-                print role
+                print(role)
 
 
 
@@ -200,10 +200,10 @@ def actionSummary(args):
         if roleList:
             maxLength = len(max(roleList.keys(), key=len))
 
-            print "Roles in " + tag + ":"
+            print("Roles in " + tag + ":")
             for role in roleList:
-                print ' - ' + role.ljust(maxLength, ' ') + '  [priority: ' + str(roleList[role]['priority']) + ']'
-            print ''
+                print(' - ' + role.ljust(maxLength, ' ') + '  [priority: ' + str(roleList[role]['priority']) + ']')
+            print('')
 
 
 
@@ -228,6 +228,7 @@ if __name__ == '__main__':
         title='subcommands',
         dest='action'
     )
+    subparsers.required = True
 
     ###################################
     ## SUMMARY command
