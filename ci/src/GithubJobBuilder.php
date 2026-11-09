@@ -468,37 +468,15 @@ class GithubJobBuilder
                     'with' => ['persist-credentials' => false],
                 ],
                 [
-                    'name' => 'Validate that template/* are used to generate Dockerfiles',
-                    'run' => implode("\n", [
-                        'docker run --rm -v $PWD:/app -w /app webdevops/dockerfile-build-env make provision',
-                        'git diff --exit-code --color=always',
-                    ]),
-                ],
-                [
-                    'name' => 'Validate .github/workflows/build.yaml is up to date',
+                    'name' => 'Validate that the generated files are up to date',
                     'run' => implode("\n", [
                         // The generators need no dev tools; check-ci-code installs those
                         'docker run --rm -v $PWD:/app -w /app/ci webdevops/php:8.4-alpine composer install --no-dev',
-                        'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console github:generate-ci',
-                        'git diff --exit-code --color=always',
-                    ]),
-                ],
-                [
-                    // Until the Python generator is removed: the PHP generators have to give the same result
-                    'name' => 'Validate that ci/console writes the same docker/ files as make provision',
-                    'run' => implode("\n", [
-                        'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console generate:dockerfile',
-                        'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console generate:provision',
+                        'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console generate',
+                        // A changed or a new file fails the step
                         'git status --porcelain',
                         'git diff --exit-code --color=always',
                         'test -z "$(git status --porcelain)"',
-                    ]),
-                ],
-                [
-                    'name' => 'Validate the README banner is up to date',
-                    'run' => implode("\n", [
-                        'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console readme-banner:generate',
-                        'git diff --exit-code --color=always',
                     ]),
                 ],
             ],

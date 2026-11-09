@@ -28,7 +28,7 @@ use function trim;
 /**
  * Writes .github/workflows/build.yaml: a build and a publish job for every Dockerfile under docker/.
  */
-#[AsCommand(name: 'github:generate-ci')]
+#[AsCommand(name: 'github:generate-ci', description: 'Writes .github/workflows/build.yaml: a build and a publish job for every Dockerfile under docker/')]
 class GithubCommand extends Command
 {
     private OutputInterface $output;

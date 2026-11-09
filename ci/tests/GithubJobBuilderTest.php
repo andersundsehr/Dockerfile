@@ -227,19 +227,18 @@ final class GithubJobBuilderTest extends TestCase
     public function testValidationJobChecksTheGeneratedFiles(): void
     {
         $job = new GithubJobBuilder(self::ROOT)->getValidationConfig();
+        $steps = $this->steps(['job' => $job], 'job');
 
         self::assertSame('Validate Automation', $job['name']);
-        self::assertSame([
-            'actions/checkout@v7',
-            'Validate that template/* are used to generate Dockerfiles',
-            'Validate .github/workflows/build.yaml is up to date',
-            'Validate that ci/console writes the same docker/ files as make provision',
-            'Validate the README banner is up to date',
-        ], array_keys($this->steps(['job' => $job], 'job')));
-        self::assertStringStartsWith(
-            'docker run --rm -v $PWD:/app -w /app/ci webdevops/php:8.4-alpine composer install --no-dev' . "\n",
-            $this->steps(['job' => $job], 'job')['Validate .github/workflows/build.yaml is up to date']['run'],
-            'generating needs no dev tools',
+        self::assertSame(['actions/checkout@v7', 'Validate that the generated files are up to date'], array_keys($steps));
+        self::assertSame(
+            "docker run --rm -v \$PWD:/app -w /app/ci webdevops/php:8.4-alpine composer install --no-dev\n"
+            . "docker run --rm -v \$PWD:/app -w /app webdevops/php:8.4-alpine ci/console generate\n"
+            . "git status --porcelain\n"
+            . "git diff --exit-code --color=always\n"
+            . 'test -z "$(git status --porcelain)"',
+            $steps['Validate that the generated files are up to date']['run'],
+            'generating needs no dev tools, and a new file fails the step too',
         );
     }
 
