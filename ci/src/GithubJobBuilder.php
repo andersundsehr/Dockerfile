@@ -484,9 +484,10 @@ class GithubJobBuilder
                     ]),
                 ],
                 [
-                    // Until the Python generator is removed: the PHP provisioning has to give the same result
-                    'name' => 'Validate that ci/console generate:provision writes the same files as make provision',
+                    // Until the Python generator is removed: the PHP generators have to give the same result
+                    'name' => 'Validate that ci/console writes the same docker/ files as make provision',
                     'run' => implode("\n", [
+                        'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console generate:dockerfile',
                         'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console generate:provision',
                         'git status --porcelain',
                         'git diff --exit-code --color=always',

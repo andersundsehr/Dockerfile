@@ -1,1 +1,3 @@
-{% extends "base.jinja2" %}
+{{ docker.fromOfficial("ubuntu", "22.04") }}
+
+{{ docker.copyFromToolbox() }}

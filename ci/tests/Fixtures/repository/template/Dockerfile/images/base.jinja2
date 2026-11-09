@@ -1,0 +1,19 @@
+{% import 'Dockerfile/docker.jinja2' as docker %}
+
+{# The macros use docker, which this file imports #}
+{% macro install(version='') -%}
+    # Install the packages
+    && apk-install \
+{%- if version == '1' %}
+        one \
+{%- elif version == '2' %}
+        two \
+{%- else %}
+        other \
+{%- endif %}
+    {{ docker.cleanup() }}
+{%- endmacro %}
+
+{% macro note(text) %}
+# {{ text }}
+{% endmacro %}

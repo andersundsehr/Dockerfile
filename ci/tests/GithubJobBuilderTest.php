@@ -233,7 +233,7 @@ final class GithubJobBuilderTest extends TestCase
             'actions/checkout@v7',
             'Validate that template/* are used to generate Dockerfiles',
             'Validate .github/workflows/build.yaml is up to date',
-            'Validate that ci/console generate:provision writes the same files as make provision',
+            'Validate that ci/console writes the same docker/ files as make provision',
             'Validate the README banner is up to date',
         ], array_keys($this->steps(['job' => $job], 'job')));
         self::assertStringStartsWith(
