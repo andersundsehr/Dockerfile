@@ -484,6 +484,16 @@ class GithubJobBuilder
                     ]),
                 ],
                 [
+                    // Until the Python generator is removed: the PHP provisioning has to give the same result
+                    'name' => 'Validate that ci/console generate:provision writes the same files as make provision',
+                    'run' => implode("\n", [
+                        'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console generate:provision',
+                        'git status --porcelain',
+                        'git diff --exit-code --color=always',
+                        'test -z "$(git status --porcelain)"',
+                    ]),
+                ],
+                [
                     'name' => 'Validate the README banner is up to date',
                     'run' => implode("\n", [
                         'docker run --rm -v $PWD:/app -w /app webdevops/php:8.4-alpine ci/console readme-banner:generate',
