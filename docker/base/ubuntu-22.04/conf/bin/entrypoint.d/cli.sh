@@ -4,10 +4,11 @@
 ## Run CLI_SCRIPT from environment variable
 #############################################
 
-if [ -n "${CLI_SCRIPT}" ]; then
-    if [ -n "$APPLICATION_USER" ]; then
-        # Run as EFFECTIVE_USER
-        shift
+if [ -n "${CLI_SCRIPT:-}" ]; then
+    # the arguments after "cli"
+    shift
+    if [ -n "${APPLICATION_USER:-}" ]; then
+        # Run as APPLICATION_USER
         exec gosu "${APPLICATION_USER}" ${CLI_SCRIPT} "$@"
     else
         # Run as root
