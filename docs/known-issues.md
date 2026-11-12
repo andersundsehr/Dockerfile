@@ -94,13 +94,6 @@ These options and tools are part of the images but do not work, or work only in 
 - **Images:** `php-nginx`, `php-nginx-dev`, `php-apache`, `php-apache-dev`, `nginx`, `apache`.
 - **Instead:** Mount your own `server.crt` and `server.key`, see [Configuration files](customization.md#configuration-files).
 
-### Alpine 3.11
-
-- **Effect:** The `alpine` tags of `bootstrap`, `base`, `base-app`, `nginx` and `apache` are built on Alpine 3.11, which has been out of support since November 2021, with Nginx 1.16.1 and Apache 2.4.51.
-- **Images:** `bootstrap:alpine`, `base:alpine`, `base-app:alpine`, `nginx:alpine`, `apache:alpine`. The Alpine variants of the PHP images are not affected; they use the Alpine release of the official PHP image.
-- **Instead:** Use the `ubuntu-22.04` tags, or a PHP image.
-- **Issue:** [#453](https://github.com/webdevops/Dockerfile/issues/453) (closed, still applies).
-
 ### `latest` and `alpine` tags of the PHP images
 
 - **Effect:** The CI no longer builds these tags, but they are still on Docker Hub. An image used without a tag, for example `image: webdevops/php-nginx`, is the `latest` image from April 2020 and gets no updates. The `alpine` tags are from April 2020 as well, those of the development images from April 2019.

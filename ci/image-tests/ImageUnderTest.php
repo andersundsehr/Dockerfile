@@ -23,7 +23,7 @@ final readonly class ImageUnderTest
      * @param string $name e.g. webdevops/php-nginx:8.5
      * @param string $reference the image to start, e.g. a local build of $name
      * @param string $osFamily alpine, debian or ubuntu
-     * @param string $osVersion e.g. 3, 12 or 22.04; empty for the Alpine tags of the base images
+     * @param string $osVersion e.g. 3, 3.24, 12 or 22.04; empty if the tests check no version
      * @param bool $phpOfficial whether the image builds on the official PHP image
      * @param string $run the run of ci/console test:image, which labels the containers; empty outside it
      */
