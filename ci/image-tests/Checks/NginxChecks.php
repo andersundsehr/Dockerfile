@@ -143,4 +143,22 @@ trait NginxChecks
     {
         $this->assertServiceRunning('nginx');
     }
+
+    /**
+     * Debian: the nginx.org repository has a keyring of its own (signed-by), not the deprecated global trusted.gpg,
+     * which apt warns about, and sources.list stays as Debian left it.
+     */
+    public function testNginxRepositoryHasAKeyringOfItsOwn(): void
+    {
+        if (self::image()->isAlpine()) {
+            self::markTestSkipped('Nginx comes from the repository of Alpine.');
+        }
+
+        self::assertNotSame(0, $this->execute('test -e /etc/apt/trusted.gpg')->exitCode, '/etc/apt/trusted.gpg should not exist');
+        self::assertMatchesRegularExpression(
+            '#^deb \[signed-by=/usr/share/keyrings/nginx-archive-keyring\.gpg\] http://nginx\.org/packages/debian/ \w+ nginx$#m',
+            $this->stdout('cat /etc/apt/sources.list.d/nginx.list'),
+        );
+        $this->assertCommandSucceeds('test -s /usr/share/keyrings/nginx-archive-keyring.gpg');
+    }
 }
