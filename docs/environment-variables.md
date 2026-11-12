@@ -35,8 +35,8 @@ Images: `base`, `base-app`, `apache`, `nginx`, `php-*`.
 | Variable | Default | Effect |
 | --- | --- | --- |
 | `CLI_SCRIPT` | not set | Command the `cli` entrypoint runs as `APPLICATION_USER`. Works in `base-app` and `php-*` only; in the other images `cli` fails because `APPLICATION_USER` is not set. See [Customization](customization.md#commands). |
-| `LOG_STDOUT` | container stdout | File that `/docker.stdout` points to. Nginx and Apache write their access logs there, syslog-ng the messages of the services, for example of cron and Postfix. PHP-FPM does not, see [Known issues](known-issues.md#log_stdout-and-log_stderr-for-php-fpm); on Alpine, syslog-ng gets no messages, see [syslog on Alpine](known-issues.md#syslog-on-alpine). |
-| `LOG_STDERR` | container stderr | File that `/docker.stderr` points to. Nginx and Apache write their error logs there. |
+| `LOG_STDOUT` | container stdout | File that `/docker.stdout` points to. Nginx, Apache and PHP-FPM write their access logs there, syslog-ng the messages of the services, for example of cron and Postfix; on Alpine, syslog-ng gets no messages, see [syslog on Alpine](known-issues.md#syslog-on-alpine). |
+| `LOG_STDERR` | container stderr | File that `/docker.stderr` points to. Nginx and Apache write their error logs there, PHP-FPM its own messages and the errors of PHP scripts. |
 | `TZ` | not set (UTC) | Time zone of the container, for example `Europe/Berlin`. It applies to `date`, cron and the time stamps supervisord writes to the container log. PHP uses `PHP_DATE_TIMEZONE` instead, see [Time zone](customization.md#time-zone). |
 
 ## Web server
