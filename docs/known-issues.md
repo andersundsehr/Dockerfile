@@ -35,17 +35,6 @@ These options and tools are part of the images but do not work, or work only in 
 - **Images:** `base`, `nginx`, `apache`. It works in `base-app` and `php-*`.
 - **Instead:** Set `APPLICATION_USER`, for example to `root`, or run the command directly; any other command runs as `root`, see [Commands](customization.md#commands).
 
-### `docker-cronjob` on Alpine
-
-- **Effect:** Fails. `/etc/cron.d` does not exist, and BusyBox `crond` does not read it.
-- **Images:** all Alpine images.
-- **Instead:** Add the job to `/etc/crontabs/root`, without the user column. In images that do not start cron by default, also run `docker-service enable cron`.
-
-  ```dockerfile
-  RUN echo '*/5 * * * * /usr/local/bin/php /app/bin/console app:cleanup' >> /etc/crontabs/root
-  ```
-- **Issue:** related question [#280](https://github.com/webdevops/Dockerfile/issues/280).
-
 ### `docker-image-cleanup` in the Alpine PHP images
 
 - **Effect:** Exits with code 1 (`find: /var/lib/apk/: No such file or directory`), so `RUN apk-install … && docker-image-cleanup` fails the build.
