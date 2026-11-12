@@ -6,9 +6,7 @@ Apache without PHP, on [`webdevops/base`](base.md).
 
 | Tag | Based on |
 | --- | --- |
-| `alpine` | `webdevops/base:alpine` (Alpine 3.11, Apache 2.4.51) |
-
-Alpine 3.11 has had no security updates since November 2021, see [Known issues](../known-issues.md#alpine-311).
+| `alpine` | `webdevops/base:alpine` (Alpine 3.24, Apache 2.4) |
 
 ## Usage
 
