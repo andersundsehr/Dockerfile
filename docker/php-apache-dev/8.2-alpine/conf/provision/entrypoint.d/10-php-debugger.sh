@@ -29,7 +29,12 @@ if [[ -n "${PHP_DEBUGGER+x}" ]]; then
         blackfire)
             echo "PHP-Debugger: Blackfire enabled"
             phpModuleRemove "xdebug"
-            docker-service-enable blackfire-agent
+            # the image has the PHP extension, but not the agent; supervisord would restart a missing agent over and over
+            if command -v blackfire-agent > /dev/null; then
+                docker-service-enable blackfire-agent
+            else
+                echo "PHP-Debugger: the Blackfire agent is not installed; run it in a container of its own and set php.blackfire.agent_socket"
+            fi
             ;;
 
         none)

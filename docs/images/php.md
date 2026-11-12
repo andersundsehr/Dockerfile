@@ -200,7 +200,7 @@ Mail from PHP-FPM and from the PHP CLI then shows up in Mailpit at http://localh
 
 `php-dev` is built on `php` and changes the following:
 
-- Xdebug is loaded by default (`xdebug.mode=debug`, `xdebug.start_with_request=trigger`, `xdebug.client_port=9003`), see [Xdebug with an IDE](#xdebug-with-an-ide). `PHP_DEBUGGER` switches to Blackfire or turns both off, see [Development images](../environment-variables.md#development-images). Known issues: the [`XDEBUG_*` variables are written into your own `php.ini`](../known-issues.md#xdebug-settings-written-into-phpini), and the [Blackfire agent is missing](../known-issues.md#blackfire-agent).
+- Xdebug is loaded by default (`xdebug.mode=debug`, `xdebug.start_with_request=trigger`, `xdebug.client_port=9003`), see [Xdebug with an IDE](#xdebug-with-an-ide). `PHP_DEBUGGER` switches to Blackfire or turns both off, see [Development images](../environment-variables.md#development-images). Known issue: the [`XDEBUG_*` variables are written into your own `php.ini`](../known-issues.md#xdebug-settings-written-into-phpini). The image contains the Blackfire extension, but not the Blackfire agent, see [Development images](../environment-variables.md#development-images).
 - `opcache.revalidate_freq` is `0`, so changed files are picked up immediately.
 - Postfix and an SSH server are started. Postfix sends mail to real recipients unless you set a relay host, see [Mail](#mail).
 - `root` and `application` have the password `dev`. Use the `-dev` images for local development only.

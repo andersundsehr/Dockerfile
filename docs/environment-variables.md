@@ -161,7 +161,7 @@ Images: `php-dev`, `php-nginx-dev`, `php-apache-dev`.
 
 | Variable | Default | Effect |
 | --- | --- | --- |
-| `PHP_DEBUGGER` | not set (Xdebug) | Debugger extension to load: `xdebug`, `blackfire` or `none`. The image contains the Blackfire PHP extension, but not the Blackfire agent. With `blackfire`, supervisord still starts the `blackfire-agent` service; it exits because the agent is missing and is restarted over and over, which fills the container log, see [Known issues](known-issues.md#blackfire-agent). |
+| `PHP_DEBUGGER` | not set (Xdebug) | Debugger extension to load: `xdebug`, `blackfire` or `none`. The image contains the Blackfire PHP extension, but not the Blackfire agent: run the agent in a container of its own and point the extension at it with `php.blackfire.agent_socket`, for example `tcp://blackfire:8307`. If you install the agent in your image, `blackfire` starts it as a service. |
 | `XDEBUG_MODE` | `debug` | `xdebug.mode` |
 | `XDEBUG_START_WITH_REQUEST` | `trigger` | `xdebug.start_with_request` |
 | `XDEBUG_CLIENT_HOST` | `localhost` | `xdebug.client_host` |
