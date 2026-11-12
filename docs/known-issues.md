@@ -46,12 +46,6 @@ These options and tools are part of the images but do not work, or work only in 
   ```
 - **Issue:** related question [#280](https://github.com/webdevops/Dockerfile/issues/280).
 
-### `docker-image-cleanup` in the Alpine PHP images
-
-- **Effect:** Exits with code 1 (`find: /var/lib/apk/: No such file or directory`), so `RUN apk-install … && docker-image-cleanup` fails the build.
-- **Images:** the `-alpine` tags of `php-*`. It works in `base:alpine`.
-- **Instead:** Leave it out; `apk-install` keeps no package cache.
-
 ### `contrib` and `non-free` packages in the Debian PHP images
 
 - **Effect:** Only the Debian component `main` is enabled. The image build tries to add `contrib` and `non-free`, but its `sed` command expects the one-line `sources.list` format, while Debian 12 lists its sources in `/etc/apt/sources.list.d/debian.sources`. Packages from `contrib` or `non-free`, for example `unrar` or `ttf-mscorefonts-installer`, cannot be installed.

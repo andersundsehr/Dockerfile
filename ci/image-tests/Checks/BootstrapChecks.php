@@ -125,4 +125,14 @@ trait BootstrapChecks
         self::assertStringNotContainsString('ERROR', $result->stdout);
         self::assertStringNotContainsString('unsatisfiable constraints', $result->stdout);
     }
+
+    /**
+     * docker-image-cleanup, for the end of a RUN that installed packages, in a container of its own: exits with 0 and
+     * empties /tmp and /var/log.
+     */
+    public function testDockerImageCleanupSucceeds(): void
+    {
+        $result = $this->runContainer(['sh', '-c', 'docker-image-cleanup > /dev/null && echo "left: $(find /tmp /var/log -mindepth 1 | wc -l)"']);
+        self::assertSame([0, "left: 0\n"], [$result->exitCode, $result->stdout], $result->describe());
+    }
 }
