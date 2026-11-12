@@ -127,4 +127,14 @@ trait ApacheChecks
     {
         $this->assertServiceRunning('apache');
     }
+
+    /**
+     * Apache names neither its version nor the operating system, in the Server header or on an error page.
+     */
+    public function testApacheHidesItsVersion(): void
+    {
+        $this->request('http://localhost/pi-number.html');
+        self::assertMatchesRegularExpression('/^Server: Apache\r?$/mi', $this->stdout('curl --silent --head http://localhost/pi-number.html'));
+        self::assertStringNotContainsString('Server at', $this->stdout('curl --silent http://localhost/image-test-missing.html'));
+    }
 }
