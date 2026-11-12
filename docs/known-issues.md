@@ -35,6 +35,30 @@ These options and tools are part of the images but do not work, or work only in 
 - **Images:** `base`, `nginx`, `apache`. It works in `base-app` and `php-*`.
 - **Instead:** Set `APPLICATION_USER`, for example to `root`, or run the command directly; any other command runs as `root`, see [Commands](customization.md#commands).
 
+### Starting as another user
+
+- **Effect:** The entrypoint needs root: it writes the configuration from the environment and starts supervisord with the services. Started as another user, for example with `user: "1000"` in `compose.yaml` or with a random UID as on OpenShift, it switches to root with `gosu`, which is setuid root in the image, and runs the command as root as usual. The entrypoint then removes the setuid bit, so that the processes of the container cannot become root with `gosu`. So the container exits at its next start, for example after `docker compose restart` or through a restart policy, with `error: failed switching to "root": operation not permitted`. Where setuid has no effect, as with `security_opt: [no-new-privileges]`, OpenShift's `restricted` security context constraint or Heroku, the first start fails already.
+- **Images:** all except `bootstrap` and `toolbox`.
+- **Instead:** Start the container as root, the default, and leave out `user:`. The services do not run their work as root: PHP-FPM runs PHP as `application`, Nginx and Apache their workers as `nginx`, `www-data` or `apache`. Run your own commands as `application`, see [Application user](customization.md#application-user).
+- **Issues:** [#219](https://github.com/webdevops/Dockerfile/issues/219), [#415](https://github.com/webdevops/Dockerfile/issues/415), [#510](https://github.com/webdevops/Dockerfile/issues/510) (closed, still apply).
+
+### `/docker.stdout` and `/docker.stderr` for other users
+
+- **Effect:** `/docker.stdout` and `/docker.stderr` point to the output of process 1, which belongs to root. Processes of other users, for example a command run with `docker compose exec -u application`, cannot open them: `Permission denied`.
+- **Images:** all except `bootstrap` and `toolbox`.
+- **Instead:** Run the process as a supervisord program of that user with `stdout_logfile = /dev/stdout`, for example in `/opt/docker/etc/supervisor.d/worker.conf`; supervisord writes its output to the container log, see [supervisord](customization.md#supervisord):
+
+  ```ini
+  [program:worker]
+  command = /app/bin/worker
+  user = application
+  stdout_logfile = /dev/stdout
+  stdout_logfile_maxbytes = 0
+  redirect_stderr = true
+  ```
+
+- **Issue:** [#332](https://github.com/webdevops/Dockerfile/issues/332) (closed, still applies).
+
 ### `docker-cronjob` on Alpine
 
 - **Effect:** Fails. `/etc/cron.d` does not exist, and BusyBox `crond` does not read it.

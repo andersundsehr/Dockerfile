@@ -83,10 +83,11 @@ final readonly class Container
      * @param array<string, string> $labels
      * @param array<string, string> $environment
      * @param list<string> $command
+     * @param list<string> $options further options of docker create, e.g. ['--user', '1000']
      */
-    public static function run(string $image, array $directories, array $labels, array $environment, array $command): CommandResult
+    public static function run(string $image, array $directories, array $labels, array $environment, array $command, array $options = []): CommandResult
     {
-        $container = self::create([], $image, $directories, $labels, $environment, $command);
+        $container = self::create($options, $image, $directories, $labels, $environment, $command);
         try {
             $process = new Process(['docker', 'start', '--attach', $container->id]);
             $process->setTimeout(self::COMMAND_TIMEOUT);
@@ -105,6 +106,21 @@ final readonly class Container
     public function isRunning(): bool
     {
         return trim(self::docker(['inspect', '--format', '{{.State.Running}}', $this->id])) === 'true';
+    }
+
+    /**
+     * The container log: what the processes of the container wrote to its stdout and stderr, e.g. supervisord.
+     */
+    public function logs(): string
+    {
+        $process = new Process(['docker', 'logs', $this->id]);
+        $process->setTimeout(self::COMMAND_TIMEOUT);
+        $process->run();
+        if ($process->getExitCode() !== 0) {
+            throw new RuntimeException(sprintf('docker logs %s failed: %s', $this->id, trim($process->getErrorOutput())));
+        }
+
+        return $process->getOutput() . $process->getErrorOutput();
     }
 
     /**
