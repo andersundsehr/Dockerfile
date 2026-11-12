@@ -22,13 +22,6 @@ These options and tools are part of the images but do not work, or work only in 
 - **Images:** all images except `bootstrap` and `toolbox`.
 - **Instead:** Leave it unset. PHP-FPM runs its workers as `application` anyway.
 
-### Blackfire agent
-
-- **Effect:** With `PHP_DEBUGGER=blackfire`, supervisord starts the `blackfire-agent` service, but the agent is not installed. It exits with code 127 and is restarted over and over, which fills the container log. The Blackfire PHP extension itself is loaded.
-- **Images:** `php-dev`, `php-nginx-dev`, `php-apache-dev`.
-- **Instead:** Run the agent in its own container and point the extension at it with `php.blackfire.agent_socket`, for example `tcp://blackfire:8307`. The restart loop in the log remains.
-- **Issue:** [#529](https://github.com/webdevops/Dockerfile/issues/529) (closed, still reproducible).
-
 ### `cli` command without `APPLICATION_USER`
 
 - **Effect:** Fails with `APPLICATION_USER: unbound variable`.
@@ -128,7 +121,7 @@ These options and tools are part of the images but do not work, or work only in 
 ## Migration from older images
 
 - `XDEBUG_REMOTE_*`, `XDEBUG_IDE_KEY`, `XDEBUG_MAX_NESTING_LEVEL` and `XDEBUG_PROFILER_*` are ignored; they belong to Xdebug 2. Set the Xdebug 3 directive with `php.xdebug.<key>` instead, for example `php.xdebug.max_nesting_level: "500"` or `php.xdebug.idekey: PHPSTORM`. The variables listed under [Development images](environment-variables.md#development-images) still work.
-- `SERVICE_BLACKFIRE_AGENT_OPTS` has no effect, because the agent is not installed (see [Blackfire agent](#blackfire-agent)).
+- `SERVICE_BLACKFIRE_AGENT_OPTS` has no effect, because the agent is not installed (see [Development images](environment-variables.md#development-images)).
 - Tags that are no longer built stay on Docker Hub without updates: PHP 5.6 to 8.1 and all operating system tags such as `debian-9` or `ubuntu-18.04`. For `latest` and `alpine`, see [above](#latest-and-alpine-tags-of-the-php-images).
 - The images `webdevops/storage`, `webdevops/vsftp` and `webdevops/ssh` are no longer built. Their last images stay on Docker Hub without updates (`ssh` since December 2022). For replacements, see [Replacing discontinued images](discontinued-images.md).
 - The Ansible provisioning is removed: `docker-provision`, `docker-ansible-install`, `/opt/docker/bin/provision` and the `provision.role*` commands of `/opt/docker/bin/control.sh`. They needed Python 2 and Ansible packages that no longer exist and did not work in any image. `/opt/docker/provision/onbuild.d` is removed too; scripts in it were never run. Use shell scripts in `bootstrap.d` or `build.d`, see [Scripts at image build](customization.md#scripts-at-image-build).

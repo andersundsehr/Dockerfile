@@ -7,6 +7,8 @@ namespace Webdevops\Build\ImageTests\Checks;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Webdevops\Build\ImageTests\ImageTestCase;
 
+use function sleep;
+
 /**
  * PHP_DEBUGGER, XDEBUG_* and BLACKFIRE_* in the development images, see
  * docs/environment-variables.md#development-images.
@@ -70,5 +72,20 @@ trait PhpDevelopmentEnvironmentChecks
         if ($debugger === 'blackfire') {
             self::assertSame(['image-test-id', 'image-test-token'], [$serverId, $serverToken], 'BLACKFIRE_SERVER_ID and BLACKFIRE_SERVER_TOKEN');
         }
+    }
+
+    /**
+     * PHP_DEBUGGER=blackfire, in a container of its own: the image has the Blackfire extension but not the agent, so
+     * supervisord does not start the agent, instead of restarting it over and over.
+     */
+    public function testBlackfireDoesNotStartAMissingAgent(): void
+    {
+        $container = $this->startContainer('blackfire', ['PHP_DEBUGGER' => 'blackfire']);
+        $this->eventually(function () use ($container): void {
+            self::assertMatchesRegularExpression('/^blackfire-agent:blackfire-agentd\s+STOPPED\s/m', $this->execute('supervisorctl status blackfire-agent:blackfire-agentd', $container)->stdout);
+        });
+        sleep(self::WAIT_SECONDS);
+        self::assertMatchesRegularExpression('/^blackfire-agent:blackfire-agentd\s+STOPPED\s/m', $this->execute('supervisorctl status blackfire-agent:blackfire-agentd', $container)->stdout, 'The agent should not have been started.');
+        self::assertContains('blackfire', $this->lines($this->stdout('php -m', $container)), 'the Blackfire extension stays loaded');
     }
 }

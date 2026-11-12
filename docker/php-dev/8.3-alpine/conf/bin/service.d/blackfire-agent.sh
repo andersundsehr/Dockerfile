@@ -7,7 +7,7 @@ source /opt/docker/bin/config.sh
 
 BLACKFIRE_ARGS=""
 
-includeScriptDir "/opt/docker/bin/service.d/syslog-ng.d/"
+includeScriptDir "/opt/docker/bin/service.d/blackfire-agent.d/"
 
 # blackfire.server_id
 if [[ -n "${BLACKFIRE_SERVER_ID+x}" ]]; then
