@@ -125,4 +125,22 @@ trait BootstrapChecks
         self::assertStringNotContainsString('ERROR', $result->stdout);
         self::assertStringNotContainsString('unsatisfiable constraints', $result->stdout);
     }
+
+    /**
+     * Each package repository of apk is one of the Alpine release of the image, so that apk does not install packages
+     * built for another release, against other libraries.
+     */
+    public function testApkRepositoriesAreOfTheAlpineRelease(): void
+    {
+        if (!self::image()->isAlpine()) {
+            self::markTestSkipped('apk is only in the Alpine images.');
+        }
+
+        $release = implode('.', array_slice(explode('.', trim($this->stdout('cat /etc/alpine-release'))), 0, 2));
+        $repositories = $this->lines($this->stdout("grep -v '^#' /etc/apk/repositories"));
+        self::assertNotSame([], $repositories);
+        foreach ($repositories as $repository) {
+            self::assertStringContainsString('/v' . $release . '/', $repository, 'a repository of another release than ' . $release);
+        }
+    }
 }
