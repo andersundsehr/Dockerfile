@@ -99,4 +99,19 @@ trait PhpWebChecks
         $this->assertNoPhpErrors($body);
         return $body;
     }
+
+    /**
+     * Right after the start, the web server answers PHP requests with 200 or not at all, never with 502 or 503 while
+     * PHP-FPM still starts.
+     */
+    public function testWebServerWaitsForPhpFpmAtTheStart(): void
+    {
+        $container = $this->startContainer('start');
+        $codes = $this->lines($this->stdout(
+            "for attempt in $(seq 300); do code=$(curl --silent --output /dev/null --write-out '%{http_code}' 'http://localhost/php-test.php?test=sha1'); echo \"\$code\"; [ \"\$code\" = 200 ] && break; sleep 0.1; done",
+            $container,
+        ));
+        self::assertSame('200', end($codes), implode(' ', $codes));
+        self::assertSame([], array_values(array_intersect($codes, ['502', '503'])), 'answers before PHP-FPM was ready: ' . implode(' ', $codes));
+    }
 }
