@@ -110,12 +110,6 @@ These options and tools are part of the images but do not work, or work only in 
 - **Images:** `php-*`, Debian and Alpine.
 - **Instead:** Add a pool file whose name sorts after `docker.conf`, for example `zz-pool.conf` with a `[www]` section, to `/opt/docker/etc/php/fpm/pool.d/`.
 
-### Several wildcards in `VIRTUAL_HOST`
-
-- **Effect:** Only the first `*.` entry becomes a wildcard for dnsmasq; further wildcard entries are dropped.
-- **Images:** all images with dnsmasq.
-- **Instead:** Use one wildcard entry.
-
 ### Expired TLS certificate
 
 - **Effect:** The self-signed certificate for `*.vm` on port 443 expired on 2025-05-01.
