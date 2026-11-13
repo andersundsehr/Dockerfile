@@ -1,7 +1,9 @@
 {% macro alpine(version='') -%}
     # Init bootstrap
+{% if version %}
     # Add community
     && echo https://dl-4.alpinelinux.org/alpine/v{{version}}/community/ >> /etc/apk/repositories \
+{% endif %}
     # System update
     && /usr/local/bin/apk-upgrade \
     # Install base stuff

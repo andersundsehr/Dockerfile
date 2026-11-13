@@ -86,12 +86,6 @@ These options and tools are part of the images but do not work, or work only in 
       && apt-install unrar
   ```
 
-### Alpine 3.20 repository in the Alpine PHP images
-
-- **Effect:** `/etc/apk/repositories` also lists the community repository of Alpine 3.20 (`https://dl-4.alpinelinux.org/alpine/v3.20/community/`), although the images are based on a newer Alpine release, for example 3.24 in `8.5-alpine`. `apk` reads that index too, so a package that is missing from the current release can be installed from Alpine 3.20, built against older libraries.
-- **Images:** `php-*` with the Alpine tags `8.2-alpine` to `8.5-alpine`.
-- **Instead:** Remove the line in your Dockerfile before you install packages: `RUN sed -i '/\/v3\.20\//d' /etc/apk/repositories`.
-
 ### Package sources in the Debian Nginx images
 
 - **Effect:** `/etc/apt/sources.list` holds only the nginx.org repository and ends without a line break. A line appended with `echo "deb ..." >> /etc/apt/sources.list` is joined to the last line: apt ignores the new repository and only prints warnings such as `component misspelt in sources.list`. The nginx.org key is stored in the deprecated global keyring `/etc/apt/trusted.gpg`, which apt trusts for every repository; `apt-get update` warns about it.
@@ -151,6 +145,7 @@ These options and tools are part of the images but do not work, or work only in 
 
 - `XDEBUG_REMOTE_*`, `XDEBUG_IDE_KEY`, `XDEBUG_MAX_NESTING_LEVEL` and `XDEBUG_PROFILER_*` are ignored; they belong to Xdebug 2. Set the Xdebug 3 directive with `php.xdebug.<key>` instead, for example `php.xdebug.max_nesting_level: "500"` or `php.xdebug.idekey: PHPSTORM`. The variables listed under [Development images](environment-variables.md#development-images) still work.
 - `SERVICE_BLACKFIRE_AGENT_OPTS` has no effect, because the agent is not installed (see [Blackfire agent](#blackfire-agent)).
+- The Alpine PHP images no longer list the community repository of Alpine 3.20. Packages that exist only there can no longer be installed, for example `apk add php82-pecl-redis` fails with `unable to select packages: php82-pecl-redis (no such package)`. Such packages belong to Alpine's own PHP, which the image's PHP does not load anyway. Remove them; many extensions such as `redis` are built in (`php -m`), others you install as described in [Installing more extensions](images/php.md#installing-more-extensions).
 - Tags that are no longer built stay on Docker Hub without updates: PHP 5.6 to 8.1 and all operating system tags such as `debian-9` or `ubuntu-18.04`. For `latest` and `alpine`, see [above](#latest-and-alpine-tags-of-the-php-images).
 - The images `webdevops/storage`, `webdevops/vsftp` and `webdevops/ssh` are no longer built. Their last images stay on Docker Hub without updates (`ssh` since December 2022). For replacements, see [Replacing discontinued images](discontinued-images.md).
 - The Ansible provisioning is removed: `docker-provision`, `docker-ansible-install`, `/opt/docker/bin/provision` and the `provision.role*` commands of `/opt/docker/bin/control.sh`. They needed Python 2 and Ansible packages that no longer exist and did not work in any image. `/opt/docker/provision/onbuild.d` is removed too; scripts in it were never run. Use shell scripts in `bootstrap.d` or `build.d`, see [Scripts at image build](customization.md#scripts-at-image-build).
