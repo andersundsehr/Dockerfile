@@ -29,6 +29,9 @@ RUN apk add --no-cache \
         # Baselayout scripts
         && wget -O /tmp/baselayout-install.sh https://raw.githubusercontent.com/webdevops/Docker-Image-Baselayout/master/install.sh \
         && sh /tmp/baselayout-install.sh /baselayout \
+        # docker-image-cleanup empties /var/lib/apk on Alpine, which current Alpine releases no longer have; empty the package cache instead
+        && sed -i 's#find /var/lib/apk/ -mindepth 1 -delete#rm -rf /var/cache/apk/*#' /baselayout/usr/local/bin/docker-image-cleanup \
+        && ! grep -q /var/lib/apk/ /baselayout/usr/local/bin/docker-image-cleanup \
         ## Install go-replace
     && wget -O "/baselayout/usr/local/bin/go-replace" "https://github.com/webdevops/go-replace/releases/download/27.9.0/go-replace.linux.$TARGETARCH" \
     && chmod +x "/baselayout/usr/local/bin/go-replace" \
