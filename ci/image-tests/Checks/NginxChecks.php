@@ -134,6 +134,26 @@ trait NginxChecks
         $this->assertPrivateToRoot($path, false);
     }
 
+    /**
+     * Nginx answers a request for a PHP script that does not exist itself, so an error_page of your own applies,
+     * instead of PHP-FPM with "File not found.".
+     */
+    public function testErrorPageForAMissingPhpScript(): void
+    {
+        $container = $this->startContainer('error-page');
+        $this->assertCommandSucceeds(
+            "printf 'error_page 404 /image-test-404.html;\\n' > /opt/docker/etc/nginx/vhost.common.d/99-image-test-error-page.conf"
+            . " && printf 'error page of the image tests\\n' > /app/image-test-404.html && supervisorctl restart nginx:nginxd",
+            $container,
+        );
+        $this->eventually(function () use ($container): void {
+            self::assertSame(
+                "error page of the image tests\n404",
+                $this->stdout("curl --silent --write-out '%{http_code}' http://localhost/image-test-missing.php", $container),
+            );
+        });
+    }
+
     public function testNginxListens(): void
     {
         $this->assertListening(80);
