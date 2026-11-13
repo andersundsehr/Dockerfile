@@ -14,6 +14,21 @@ if [[ "$#" -eq 0 ]]; then
     exit 1
 fi
 
+if [[ "$(docker-image-info family)" == "Alpine" ]]; then
+    # BusyBox crond reads one crontab per user from /etc/crontabs, without the user column
+    for CRONJOB_LINE in "$@"; do
+        if [[ ! "$CRONJOB_LINE" =~ ^[[:space:]]*(([^[:space:]]+[[:space:]]+){5})([^[:space:]]+)[[:space:]]+(.+)$ ]]; then
+            echo "[ERROR] Not a cron job line with five time fields, a user and a command: $CRONJOB_LINE"
+            exit 1
+        fi
+
+        CRONJOB_USER="${BASH_REMATCH[3]}"
+        echo "${BASH_REMATCH[1]}${BASH_REMATCH[4]}" >> "/etc/crontabs/${CRONJOB_USER}"
+        chmod 0600 "/etc/crontabs/${CRONJOB_USER}"
+    done
+    exit 0
+fi
+
 # create crontab file
 touch /etc/cron.d/webdevops-docker
 chmod 0644 /etc/cron.d/webdevops-docker

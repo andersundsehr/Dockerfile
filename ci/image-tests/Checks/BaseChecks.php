@@ -134,4 +134,22 @@ trait BaseChecks
     {
         $this->assertPackageInstalled($package);
     }
+
+    /**
+     * docker-cronjob adds a job in the system crontab format, with its user, see docs/customization.md#cron-jobs. On
+     * Alpine it goes to the crontab of that user in /etc/crontabs. In a container of its own, whose cron starts again
+     * after the job was added, as at the start of an image built with the job.
+     */
+    public function testDockerCronjobRunsTheJobAsItsUser(): void
+    {
+        $container = $this->startContainer('cronjob');
+        $this->assertCommandSucceeds(
+            "docker-cronjob '* * * * * nobody id -un > /tmp/image-test-cronjob' && docker-service enable cron && supervisorctl update && supervisorctl restart cron:crond",
+            $container,
+        );
+        // cron runs the job at the start of the next minute
+        $this->waitFor(function () use ($container): void {
+            self::assertSame("nobody\n", $this->execute('cat /tmp/image-test-cronjob 2>/dev/null', $container)->stdout);
+        }, 30, 5);
+    }
 }
