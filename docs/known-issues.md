@@ -29,12 +29,6 @@ These options and tools are part of the images but do not work, or work only in 
 - **Instead:** Run the agent in its own container and point the extension at it with `php.blackfire.agent_socket`, for example `tcp://blackfire:8307`. The restart loop in the log remains.
 - **Issue:** [#529](https://github.com/webdevops/Dockerfile/issues/529) (closed, still reproducible).
 
-### `cli` command without `APPLICATION_USER`
-
-- **Effect:** Fails with `APPLICATION_USER: unbound variable`.
-- **Images:** `base`, `nginx`, `apache`. It works in `base-app` and `php-*`.
-- **Instead:** Set `APPLICATION_USER`, for example to `root`, or run the command directly; any other command runs as `root`, see [Commands](customization.md#commands).
-
 ### `docker-cronjob` on Alpine
 
 - **Effect:** Fails. `/etc/cron.d` does not exist, and BusyBox `crond` does not read it.
