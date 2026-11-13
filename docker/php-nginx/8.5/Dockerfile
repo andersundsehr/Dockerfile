@@ -17,9 +17,10 @@ COPY conf/ /opt/docker/
 
 RUN set -x \
     # Install nginx
-    && printf "deb http://nginx.org/packages/debian/ $(docker-image-info dist-codename)  nginx\n deb-src http://nginx.org/packages/debian/ $(docker-image-info dist-codename) nginx" \
-    >> /etc/apt/sources.list \
-    && curl -L https://nginx.org/keys/nginx_signing.key | apt-key add - \
+    # the key in a keyring of its own, which only this repository uses, instead of the deprecated trusted.gpg
+    && curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/share/keyrings/nginx-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian/ $(docker-image-info dist-codename) nginx" \
+        > /etc/apt/sources.list.d/nginx.list \
     && apt-install \
     nginx \
     && docker-run-bootstrap \

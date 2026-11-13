@@ -92,12 +92,6 @@ These options and tools are part of the images but do not work, or work only in 
 - **Images:** `php-*` with the Alpine tags `8.2-alpine` to `8.5-alpine`.
 - **Instead:** Remove the line in your Dockerfile before you install packages: `RUN sed -i '/\/v3\.20\//d' /etc/apk/repositories`.
 
-### Package sources in the Debian Nginx images
-
-- **Effect:** `/etc/apt/sources.list` holds only the nginx.org repository and ends without a line break. A line appended with `echo "deb ..." >> /etc/apt/sources.list` is joined to the last line: apt ignores the new repository and only prints warnings such as `component misspelt in sources.list`. The nginx.org key is stored in the deprecated global keyring `/etc/apt/trusted.gpg`, which apt trusts for every repository; `apt-get update` warns about it.
-- **Images:** `php-nginx` and `php-nginx-dev` with the Debian tags `8.2` to `8.5`.
-- **Instead:** Add your own repositories as a new file in `/etc/apt/sources.list.d/`, for example `echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list`.
-
 ### Xdebug settings written into `php.ini`
 
 - **Effect:** When an `XDEBUG_*` variable is set, the development images append its setting to `/opt/docker/etc/php/php.ini`, your own file. A read-write mount gets one more line on every start of the container, also on the host; with a `:ro` mount the container exits at start.
