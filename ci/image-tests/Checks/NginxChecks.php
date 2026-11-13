@@ -134,6 +134,17 @@ trait NginxChecks
         $this->assertPrivateToRoot($path, false);
     }
 
+    /**
+     * Nginx does not name its version, in the Server header or on its own error pages, e.g. for a bad request.
+     */
+    public function testNginxHidesItsVersion(): void
+    {
+        $this->request('http://localhost/pi-number.html');
+        self::assertMatchesRegularExpression('/^Server: nginx\r?$/mi', $this->stdout('curl --silent --head http://localhost/pi-number.html'));
+        $page = $this->stdout('curl --silent http://localhost/%');
+        self::assertStringContainsString('<center>nginx</center>', $page, 'an error page of Nginx itself');
+    }
+
     public function testNginxListens(): void
     {
         $this->assertListening(80);
