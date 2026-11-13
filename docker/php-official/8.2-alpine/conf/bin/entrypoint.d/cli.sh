@@ -7,11 +7,11 @@
 if [ -n "${CLI_SCRIPT:-}" ]; then
     # the arguments after "cli"
     shift
-    if [ -n "${APPLICATION_USER:-}" ]; then
-        # Run as APPLICATION_USER
-        exec gosu "${APPLICATION_USER}" ${CLI_SCRIPT} "$@"
+    # APPLICATION_USER, by default application; root in the images without that user (base, nginx, apache)
+    CLI_USER="${APPLICATION_USER:-application}"
+    if id -u "$CLI_USER" > /dev/null 2>&1; then
+        exec gosu "$CLI_USER" ${CLI_SCRIPT} "$@"
     else
-        # Run as root
         exec ${CLI_SCRIPT} "$@"
     fi
 else

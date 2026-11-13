@@ -48,6 +48,15 @@ trait BaseAppChecks
         self::assertSame([0, "application\n"], [$result->exitCode, $result->stdout], $result->describe());
     }
 
+    /**
+     * With APPLICATION_USER empty, cli runs CLI_SCRIPT as application, the default.
+     */
+    public function testCliRunsTheCliScriptAsApplicationWithoutApplicationUser(): void
+    {
+        $result = $this->runContainer(['cli', '-un'], ['CLI_SCRIPT' => 'id', 'APPLICATION_USER' => '']);
+        self::assertSame([0, "application\n"], [$result->exitCode, $result->stdout], $result->describe());
+    }
+
     public function testMoreutils(): void
     {
         if (!self::image()->isDebianOrUbuntu()) {

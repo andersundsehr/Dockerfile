@@ -22,7 +22,7 @@ Images: `base-app`, `php-*`.
 
 | Variable | Default | Effect |
 | --- | --- | --- |
-| `APPLICATION_USER` | `application`; not set in `base`, `nginx` and `apache` | User the `cli` entrypoint runs `CLI_SCRIPT` as; where it is not set, `root`. |
+| `APPLICATION_USER` | `application`; not set in `base`, `nginx` and `apache` | User the `cli` entrypoint runs `CLI_SCRIPT` as. If it is not set or empty, `cli` uses `application`, and `root` in `base`, `nginx` and `apache`, which have no `application` user. |
 | `APPLICATION_GROUP` | `application` | Information only. The group is created when the image is built; changing the variable has no effect. |
 | `APPLICATION_UID` | `1000` | Information only: UID of the `application` user. To change it, see [Other UID or GID](customization.md#other-uid-or-gid). |
 | `APPLICATION_GID` | `1000` | Information only: GID of the `application` group. To change it, see [Other UID or GID](customization.md#other-uid-or-gid). |
@@ -34,7 +34,7 @@ Images: `base`, `base-app`, `apache`, `nginx`, `php-*`.
 
 | Variable | Default | Effect |
 | --- | --- | --- |
-| `CLI_SCRIPT` | not set | Command the `cli` entrypoint runs as `APPLICATION_USER`, or as `root` where that is not set. See [Customization](customization.md#commands). |
+| `CLI_SCRIPT` | not set | Command the `cli` entrypoint runs as `APPLICATION_USER`, see there. See [Customization](customization.md#commands). |
 | `LOG_STDOUT` | container stdout | File that `/docker.stdout` points to. Nginx, Apache, PHP-FPM and syslog-ng write their logs to `/docker.stdout` and `/docker.stderr`. |
 | `LOG_STDERR` | container stderr | File that `/docker.stderr` points to. |
 | `TZ` | not set (UTC) | Time zone of the container, for example `Europe/Berlin`. It applies to `date`, cron and the time stamps supervisord writes to the container log. PHP uses `PHP_DATE_TIMEZONE` instead, see [Time zone](customization.md#time-zone). |
