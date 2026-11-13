@@ -297,7 +297,8 @@ Images: `php-*`. Files in `/opt/docker/etc/php/`:
 | `php.webdevops.ini` | The image's PHP defaults, followed by the values of the `php.*` and `PHP_*` variables. Loaded as `98-webdevops.ini`. At every start it is reset to the image's version and the variables are written again, so do not replace or edit it. |
 | `php.ini` | For your settings, empty by default. Loaded as `99-docker.ini`, after `98-webdevops.ini`, so its values win over the environment variables. A `:ro` mount works, except in the development images when one of the [`XDEBUG_*` variables](environment-variables.md#development-images) is set: these images write the Xdebug settings into this file, and with `:ro` the container exits at start. |
 | `fpm/php-fpm.conf` | PHP-FPM main configuration; `FPM_PROCESS_MAX` and `fpm.global.*` are appended at every start. |
-| `fpm/pool.d/application.conf` | The PHP-FPM pool `[www]`; the `FPM_*` and `fpm.pool.*` values are appended at every start. To replace it, use `COPY` in a Dockerfile: with a `:ro` mount the container exits at start, and a read-write mount gets the values appended in the file on the host. |
+| `fpm/pool.d/application.conf` | The PHP-FPM pool `[www]`. You can replace it, also with a `:ro` mount. |
+| `fpm/pool.d/zz-environment.conf` | Written at every start: the `FPM_*` and `fpm.pool.*` values and the user of the pool. PHP-FPM reads it after `application.conf` and after `docker.conf` of the official PHP image, so its values win over both. Do not replace or edit it. |
 
 `PHP_SENDMAIL_PATH` is the exception to the order above. It is also written into the pool as `php_admin_value[sendmail_path]`, and it is always set (default `/usr/sbin/sendmail -t -i`). So for requests handled by PHP-FPM, `sendmail_path` in your `php.ini` has no effect; only the PHP CLI uses it. Set `PHP_SENDMAIL_PATH` instead.
 

@@ -37,4 +37,20 @@ trait PhpFpmChecks
     {
         self::assertMatchesRegularExpression('/^session\.upload_progress\.enabled => Off => Off$/m', $this->stdout('php-fpm -i'));
     }
+
+    /**
+     * fpm.pool.<key> also sets the directives that docker.conf of the official image sets, such as clear_env: the values
+     * from the environment go to zz-environment.conf, which PHP-FPM reads after docker.conf. application.conf, which
+     * you may replace, stays as the image has it. In a container of its own.
+     */
+    public function testFpmPoolSetsTheDirectivesOfDockerConf(): void
+    {
+        $result = $this->runContainer(
+            ['sh', '-c', 'php-fpm -tt 2>&1 | grep -E "NOTICE:[[:space:]]+(clear_env|catch_workers_output) = "; grep -c "container env settings" /opt/docker/etc/php/fpm/pool.d/application.conf'],
+            ['fpm.pool.clear_env' => 'yes', 'fpm.pool.catch_workers_output' => 'no'],
+        );
+        self::assertMatchesRegularExpression('/NOTICE:\s+clear_env = yes$/m', $result->stdout, $result->describe());
+        self::assertMatchesRegularExpression('/NOTICE:\s+catch_workers_output = no$/m', $result->stdout, $result->describe());
+        self::assertMatchesRegularExpression('/^0$/m', $result->stdout, 'application.conf has no values from the environment');
+    }
 }
