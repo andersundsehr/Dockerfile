@@ -136,4 +136,21 @@ trait ApacheChecks
     {
         $this->assertServiceRunning('apache');
     }
+
+    /**
+     * The ErrorDocument of a .htaccess answers a request for a PHP script that does not exist, instead of PHP-FPM with
+     * "File not found.".
+     */
+    public function testErrorDocumentForAMissingPhpScript(): void
+    {
+        $container = $this->startContainer('error-document');
+        $this->assertCommandSucceeds("printf 'ErrorDocument 404 /image-test-404.html\\n' > /app/.htaccess && printf 'error document of the image tests\\n' > /app/image-test-404.html", $container);
+        $this->request('http://localhost/pi-number.html', container: $container);
+        $this->eventually(function () use ($container): void {
+            self::assertSame(
+                "error document of the image tests\n404",
+                $this->stdout("curl --silent --write-out '%{http_code}' http://localhost/image-test-missing.php", $container),
+            );
+        });
+    }
 }
