@@ -331,6 +331,8 @@ List them with `docker compose exec app locale -a`.
 
 Images based on `base-app`, and all `php-*` images, contain the user and group `application` (UID and GID `1000`) and the directory `/app`, owned by that user. PHP-FPM runs as `application`.
 
+Start the container itself as `root`, the default; with `user:` in `compose.yaml` it fails at the latest at its next start, see [Known issues](known-issues.md#starting-as-another-user).
+
 `docker compose exec` runs commands as `root`. Files they create belong to `root`, on the host too when `/app` is mounted from there. Run commands that write files as `application`:
 
 ```sh

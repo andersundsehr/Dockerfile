@@ -83,10 +83,11 @@ final readonly class Container
      * @param array<string, string> $labels
      * @param array<string, string> $environment
      * @param list<string> $command
+     * @param list<string> $options further options of docker create, e.g. ['--user', '1000']
      */
-    public static function run(string $image, array $directories, array $labels, array $environment, array $command): CommandResult
+    public static function run(string $image, array $directories, array $labels, array $environment, array $command, array $options = []): CommandResult
     {
-        $container = self::create([], $image, $directories, $labels, $environment, $command);
+        $container = self::create($options, $image, $directories, $labels, $environment, $command);
         try {
             $process = new Process(['docker', 'start', '--attach', $container->id]);
             $process->setTimeout(self::COMMAND_TIMEOUT);

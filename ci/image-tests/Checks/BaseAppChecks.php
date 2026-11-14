@@ -7,6 +7,7 @@ namespace Webdevops\Build\ImageTests\Checks;
 use Webdevops\Build\ImageTests\ImageTestCase;
 
 use function explode;
+use function str_contains;
 use function trim;
 
 /**
@@ -59,6 +60,42 @@ trait BaseAppChecks
     {
         $result = $this->runContainer(['cli', '-un'], ['CLI_SCRIPT' => 'id']);
         self::assertSame([0, "application\n"], [$result->exitCode, $result->stdout], $result->describe());
+    }
+
+    /**
+     * /docker.stdout points to the output of process 1, which belongs to root, so a process of the application user
+     * cannot write to it, see docs/known-issues.md#dockerstdout-and-dockerstderr-for-other-users.
+     */
+    public function testApplicationUserCannotWriteToDockerStdout(): void
+    {
+        $result = $this->execute('gosu application sh -c "echo image-test > /docker.stdout"');
+        self::assertNotSame(0, $result->exitCode, $result->describe());
+        self::assertStringContainsString('Permission denied', $result->stderr);
+    }
+
+    /**
+     * The way around it, as in docs/known-issues.md: a supervisord program of the application user with
+     * stdout_logfile = /dev/stdout writes to the container log, because supervisord itself opens /dev/stdout.
+     */
+    public function testSupervisordProgramOfTheApplicationUserLogsToTheContainerLog(): void
+    {
+        $container = $this->startContainer('application-program');
+        if (!str_contains($this->stdout('tr "\\000" " " < /proc/1/cmdline', $container), 'supervisord')) {
+            self::markTestSkipped('The image does not run supervisord.');
+        }
+
+        $this->assertCommandSucceeds(<<<'SH'
+            set -e
+            mkdir -p /app/bin
+            printf '%s\n' '#!/bin/sh' 'echo "worker as $(id -un)"' 'exec sleep 3600' > /app/bin/worker
+            chmod +x /app/bin/worker
+            printf '%s\n' '[program:worker]' 'command = /app/bin/worker' 'user = application' 'stdout_logfile = /dev/stdout' \
+                'stdout_logfile_maxbytes = 0' 'redirect_stderr = true' > /opt/docker/etc/supervisor.d/worker.conf
+            supervisorctl update
+            SH, $container);
+        $this->eventually(static function () use ($container): void {
+            self::assertStringContainsString("worker as application\n", $container->logs());
+        });
     }
 
     public function testMoreutils(): void

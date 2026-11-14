@@ -349,10 +349,11 @@ abstract class ImageTestCase extends TestCase
      *
      * @param list<string> $command
      * @param array<string, string> $environment
+     * @param list<string> $options further options of docker create, e.g. ['--user', '1000']
      */
-    protected function runContainer(array $command, array $environment = []): CommandResult
+    protected function runContainer(array $command, array $environment = [], array $options = []): CommandResult
     {
-        return Container::run(self::image()->reference, [self::FIXTURES, self::HOOKS], self::labels(), $environment, $command);
+        return Container::run(self::image()->reference, [self::FIXTURES, self::HOOKS], self::labels(), $environment, $command, $options);
     }
 
     /**
