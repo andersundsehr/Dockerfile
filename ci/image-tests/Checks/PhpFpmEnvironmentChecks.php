@@ -44,11 +44,26 @@ trait PhpFpmEnvironmentChecks
     public function testPhpFpmLogsToTheFilesFromTheEnvironment(): void
     {
         $container = $this->environmentContainer();
-        self::assertSame('logged', $this->phpFpmBody($container, 'test=error_log&message=image-test-php-fpm-log'));
+        self::assertSame('logged', $this->phpFpmBody($container, 'test=error_log'));
         $this->eventually(function () use ($container): void {
             // the development images log in a format of their own
-            self::assertMatchesRegularExpression('#"GET /php-test\.php\?test=error_log&message=image-test-php-fpm-log" 200 /app/php-test\.php #', $this->stdout('cat ' . static::ENVIRONMENT['LOG_STDOUT'], $container));
+            self::assertMatchesRegularExpression('#"GET /php-test\.php\?test=error_log" 200 /app/php-test\.php #', $this->stdout('cat ' . static::ENVIRONMENT['LOG_STDOUT'], $container));
             self::assertStringContainsString('PHP message: image-test-php-fpm-log', $this->stdout('cat ' . static::ENVIRONMENT['LOG_STDERR'], $container));
+        });
+    }
+
+    /**
+     * Without LOG_STDOUT and LOG_STDERR, /docker.stdout and /docker.stderr are the stdout and stderr of the container:
+     * the access log of PHP-FPM and the errors of PHP scripts still reach the container log.
+     */
+    public function testPhpFpmLogsToTheContainerLogByDefault(): void
+    {
+        $container = self::container();
+        self::assertSame('logged', $this->phpFpmBody($container, 'test=error_log'));
+        $this->eventually(function () use ($container): void {
+            $log = $container->logs();
+            self::assertMatchesRegularExpression('#"GET /php-test\.php\?test=error_log" 200 /app/php-test\.php #', $log);
+            self::assertStringContainsString('PHP message: image-test-php-fpm-log', $log);
         });
     }
 
