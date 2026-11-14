@@ -75,6 +75,11 @@ switch ($_GET['test']) {
         echo 'done';
         break;
 
+    case 'error_log':
+        error_log('image-test-php-fpm-log');
+        echo 'logged';
+        break;
+
     case 'request':
         header('Content-Type: application/json');
         echo json_encode([

@@ -22,12 +22,6 @@ These options and tools are part of the images but do not work, or work only in 
 - **Images:** all images except `bootstrap` and `toolbox`.
 - **Instead:** Leave it unset. PHP-FPM runs its workers as `application` anyway.
 
-### `LOG_STDOUT` and `LOG_STDERR` for PHP-FPM
-
-- **Effect:** PHP-FPM writes its access log, its own messages and the errors of PHP scripts to the stderr of the container, not to `/docker.stdout` and `/docker.stderr`, so `LOG_STDOUT` and `LOG_STDERR` do not apply to it. The `docker.conf` of the official PHP image sets `error_log` and `access.log` to `/proc/self/fd/2` after the configuration of the image.
-- **Images:** `php-*`, Debian and Alpine.
-- **Instead:** Read them with `docker compose logs`. To have PHP-FPM's messages and the PHP errors in the file of `LOG_STDERR`, also set `fpm.global.error_log: /docker.stderr`. The access log needs a pool file that sorts after `docker.conf`, see [`fpm.pool.<key>`](#fpmpoolkey-for-the-directives-of-dockerconf).
-
 ### syslog on Alpine
 
 - **Effect:** syslog-ng takes messages on `/dev/log` only as a stream, but programs on Alpine send them as datagrams. The messages of cron, Postfix and `logger` are lost: they reach neither the container log nor the file of `LOG_STDOUT`.

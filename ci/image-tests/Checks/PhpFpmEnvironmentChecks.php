@@ -38,6 +38,36 @@ trait PhpFpmEnvironmentChecks
     }
 
     /**
+     * LOG_STDOUT and LOG_STDERR for PHP-FPM: its access log goes to the file of LOG_STDOUT, its own messages and the
+     * errors of PHP scripts to the one of LOG_STDERR.
+     */
+    public function testPhpFpmLogsToTheFilesFromTheEnvironment(): void
+    {
+        $container = $this->environmentContainer();
+        self::assertSame('logged', $this->phpFpmBody($container, 'test=error_log'));
+        $this->eventually(function () use ($container): void {
+            // the development images log in a format of their own
+            self::assertMatchesRegularExpression('#"GET /php-test\.php\?test=error_log" 200 /app/php-test\.php #', $this->stdout('cat ' . static::ENVIRONMENT['LOG_STDOUT'], $container));
+            self::assertStringContainsString('PHP message: image-test-php-fpm-log', $this->stdout('cat ' . static::ENVIRONMENT['LOG_STDERR'], $container));
+        });
+    }
+
+    /**
+     * Without LOG_STDOUT and LOG_STDERR, /docker.stdout and /docker.stderr are the stdout and stderr of the container:
+     * the access log of PHP-FPM and the errors of PHP scripts still reach the container log.
+     */
+    public function testPhpFpmLogsToTheContainerLogByDefault(): void
+    {
+        $container = self::container();
+        self::assertSame('logged', $this->phpFpmBody($container, 'test=error_log'));
+        $this->eventually(function () use ($container): void {
+            $log = $container->logs();
+            self::assertMatchesRegularExpression('#"GET /php-test\.php\?test=error_log" 200 /app/php-test\.php #', $log);
+            self::assertStringContainsString('PHP message: image-test-php-fpm-log', $log);
+        });
+    }
+
+    /**
      * FPM_REQUEST_TERMINATE_TIMEOUT=4: PHP-FPM ends a request that sleeps for 8 s after 4 s, without a response.
      * PHP_MAX_EXECUTION_TIME does not stop it, because time in sleep() does not count.
      */

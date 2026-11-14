@@ -25,6 +25,15 @@ go-replace --mode=lineinfile --regex \
     -s '^[\s;]*listen.allowed_clients[\s]*='        -r ";listen.allowed_clients" \
     -- /opt/docker/etc/php/fpm/pool.d/application.conf
 
+# docker.conf of the official image comes after application.conf and sends the logs of PHP-FPM to its own stderr: to
+# /docker.stdout and /docker.stderr instead, like the other services, so that LOG_STDOUT and LOG_STDERR apply
+if [[ -f /opt/docker/etc/php/fpm/pool.d/docker.conf ]]; then
+    go-replace --mode=line --regex \
+        -s '^[\s;]*error_log[\s]*='  -r 'error_log = /docker.stderr' \
+        -s '^[\s;]*access.log[\s]*=' -r 'access.log = /docker.stdout' \
+        -- /opt/docker/etc/php/fpm/pool.d/docker.conf
+fi
+
 # Fix user setting
 go-replace --mode=line --regex \
     -s '^[\s;]*user[\s]*='  -r "user = $APPLICATION_USER" \
